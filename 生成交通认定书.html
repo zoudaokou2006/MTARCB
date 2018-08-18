@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="magic-input.min.css">
+
+    <style>
+        * {
+            font-family: "lucida grande", "lucida sans unicode", lucida, helvetica, "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+            font-size: 14px;
+        }
+
+        h1 {
+            font-size: 28px;
+        }
+
+        /* 设置p上下距离为0，左右自动 */
+        p {
+            margin: 0 auto;
+        }
+
+        .personDiv, .resultDiv {
+            border-top: 2px solid #00F;
+        }
+
+        textarea {
+            width: 800px;
+        }
+    </style>
+</head>
+<body>
+
+
+    <!--姓名: <input type="text" name="fname" />
+    责任:
+    <select>
+        <option value="全责">全责</option>
+        <option value="主要">主要</option>
+        <option value="同等">同等</option>
+        <option value="次要">次要</option>
+        <option value="无责">无责</option>
+    </select>
+    <p>
+        违法行为：
+        <input type="checkbox" id="illegal1" name="vehicle" value="Bike" style="zoom:150%;" />未保持安全车速
+        <input type="checkbox" id="illegal2" name="vehicle" value="Car" style="zoom:150%;" />操作不当
+        <input type="checkbox" id="illegal3" name="vehicle" value="Car" style="zoom:150%;" />安全设施不全
+        <input type="checkbox" id="illegal4" name="vehicle" value="Car" />无证
+    </p>
+    <br />-->
+
+    <script type="text/javascript" src="机动车常用违法行为.js"></script>
+    <script type="text/javascript" src="非机动车常用违法行为.js"></script>
+    <script language="javascript">
+        //违法行为
+        function Action(title, action, law) {
+            //显示的标题
+            this.title = title;
+            //行为
+            this.action = action;
+            //法律
+            this.law = law;
+        }
+
+        //机动车违法行为
+        //var motorActionArray = new Array(
+        //        new Action("操作不当", "《中华人民共和国道路交通安全法》第二十二条第一款（机动车驾驶人应当遵守道路交通安全法律、法规的规定，按照操作规范安全驾驶、文明驾驶。）的规定"),
+
+        //        new Action("安全设施不全", "《中华人民共和国道路交通安全法》第二十一条（驾驶人驾驶机动车上道路行驶前，应当对机动车的安全技术性能进行认真检查；不得驾驶安全设施不全或者机件不符合技术标准等具有安全隐患的机动车。）的规定"),
+
+        //        new Action("无证", "《中华人民共和国道路交通安全法》第十九条（驾驶机动车，应当依法取得机动车驾驶证。）的规定"),
+
+        //        new Action("违法载人", "《中华人民共和国道路交通安全法》第五十条第一款（禁止货运机动车载客。）的规定"),
+
+        //        new Action("疏忽大意", "《中华人民共和国道路交通安全法》第三十八条（车辆、行人应当照交通信号通行；遇有交通警察现场指挥时，应当按照交通警察的指挥通行；在没有交通信号的道路上，应当在确保安全、畅通的原则下通行。）的规定"),
+
+        //        new Action("观察不当", "《中华人民共和国道路交通安全法》第三十八条（车辆、行人应当按照交通信号通行；遇有交通警察现场指挥时，应当按照交通警察的指挥通行；在没有交通信号的道路上，应当在确保安全、畅通的原则下通行。）的规定"),
+
+        //        new Action("发生道路交通事故后逃逸", "《中华人民共和国道路交通安全法》第七十条第一款（在道路上发生交通事故，车辆驾驶人应当立即停车，保护现场；造成人身伤亡的，车辆驾驶人应当立即抢救受伤人员，并迅速报告执勤的交通警察或者公安机关交通管理部门。因抢救受伤人员变动现场的，应当标明位置。乘车人、过往车辆驾驶人、过往行人应当予以协助。）的规定"),
+
+        //        new Action("未保持安全间距", "《山东省实施<中华人民共和国道路交通安全法>办法》第四十五条第二款（机动车驾驶人在行驶中应当根据路面状况，保持车辆安全间距。）的规定"),
+
+        //        new Action("饮酒", "《中华人民共和国道路交通安全法》第二十二条第二款（饮酒、服用国家管制的精神药品或者麻醉药品，或者患有妨碍安全驾驶机动车的疾病，或者过度疲劳影响安全驾驶的，不得驾驶机动车。）的规定"),
+
+        //        new Action("未靠右侧通行", "《中华人民共和国道路交通安全法》第三十五条（机动车、非机动车实行右侧通行。）的规定")
+        //    );
+
+        //编号
+        var g_person_index = 0;
+
+        //交通事件
+        var g_accident = new Object();
+        g_accident.condition = 0;
+        g_accident.QuanZeIndex = 0;
+        g_accident.ZhuYaoIndex = 0;
+        g_accident.CiYaoIndex = new Array();
+        g_accident.TongDengIndex = new Array();
+        g_accident.WuZeIndex = new Array();
+
+        function clearAccident() {
+            g_accident.condition = 0;
+            g_accident.QuanZeIndex = 0;
+            g_accident.ZhuYaoIndex = 0;
+            g_accident.CiYaoIndex = new Array();
+            g_accident.TongDengIndex = new Array();
+            g_accident.WuZeIndex = new Array();
+        }
+
+        //责任
+        var dutyArray = new Array("全责", "主要", "同等", "次要", "无责");
+
+        //车辆
+        var vehicleArray = new Array("机动车", "非机动车", "行人");
+
+        function addPerson() {
+            g_person_index += 1;
+
+            var root = document.getElementById("personList");
+            var tmp = document.createElement("div");
+            tmp.className = "personDiv";
+            root.appendChild(tmp);
+            root = tmp;
+
+            addBr(root);
+            root.appendChild(document.createTextNode("姓名: "));
+            var editTextName = document.createElement("input");
+            //增加自定义属性，用于表明该节点包含姓名信息
+            editTextName.setAttribute("data-type", "person_name");
+            editTextName.type = "text";
+            editTextName.name = "person_name";
+            root.appendChild(editTextName);
+            addBlank(root);
+
+            root.appendChild(document.createTextNode("责任: "));
+            addPersonDuty(root);
+            addBlank(root);
+
+            root.appendChild(document.createTextNode("车辆: "));
+            var vehicle = addVehicle(root);
+            addBr(root);
+
+            root.appendChild(document.createTextNode("违法行为: "));
+            addAction(root, vehicle);
+            addBr(root);
+        }
+
+        //添加空格
+        function addBlank(root) {
+            var blank = document.createElement("em");
+            blank.innerHTML = "&nbsp;&nbsp;&nbsp;&nbsp;";
+            root.appendChild(blank);
+        }
+
+        //添加换行
+        function addBr(root) {
+            var blank = document.createElement("br");
+            root.appendChild(blank);
+        }
+
+        //添加责任节点
+        function addPersonDuty(root) {
+            var selectDuty = document.createElement("select");
+            //增加自定义属性，用于表明该节点包含责任信息
+            selectDuty.setAttribute("data-type", "person_duty");
+            selectDuty.name = "person_duty";
+            root.appendChild(selectDuty);
+
+            for (var i = 0; i < dutyArray.length; i++) {
+                var option = document.createElement("option");
+                option.value = dutyArray[i];
+                option.text = dutyArray[i];
+                selectDuty.appendChild(option);
+            }
+        }
+
+        //添加车辆节点
+        function addVehicle(root) {
+            var selectVehicle = document.createElement("select");
+            //增加自定义属性，用于表明该节点包含车辆信息
+            selectVehicle.setAttribute("data-type", "person_vehicle");
+            selectVehicle.id = "person_vehicle_" + g_person_index;
+            selectVehicle.name = "person_vehicle";
+            var g_person_index_tmp = g_person_index;
+            selectVehicle.onchange = function () {
+                var p = document.getElementById("person_action_" + g_person_index_tmp);
+                updateActionDetail(p, this.options[this.selectedIndex].value);
+                //alert(this.options[this.selectedIndex].value);
+            };
+            root.appendChild(selectVehicle);
+
+            for (var i = 0; i < vehicleArray.length; i++) {
+                var option = document.createElement("option");
+                option.value = vehicleArray[i];
+                option.text = vehicleArray[i];
+                selectVehicle.appendChild(option);
+            }
+            return vehicleArray[0];
+        }
+
+        //添加违法行为节点中的checkbox
+        function updateActionDetail(root, vehicle) {
+            removeAllChild(root);
+
+            var actionArray = new Array();
+            switch (vehicle) {
+                case "机动车": actionArray = motorActionArray; break;
+                case "非机动车": actionArray = nonMotorActionArray; break;
+            }
+            for (var i = 0; i < actionArray.length; i++) {
+                var checkBoxAction = document.createElement("input");
+                checkBoxAction.type = "checkbox";
+                checkBoxAction.name = "person_action";
+                checkBoxAction.style.zoom = "130%";
+                checkBoxAction.value = actionArray[i].title;
+                checkBoxAction.className = "mgc mgc-danger";
+                root.appendChild(checkBoxAction);
+                root.appendChild(document.createTextNode(actionArray[i].title));
+                addBlank(root);
+            }
+        }
+
+        //添加违法行为节点
+        function addAction(root, vehicle) {
+
+            var p = document.createElement("p");
+            //增加自定义属性，用于表明该节点包含违法行为信息
+            p.id = "person_action_" + g_person_index;
+            p.setAttribute("data-type", "person_action");
+            updateActionDetail(p, vehicle);
+            root.appendChild(p);
+        }
+
+        //解析责任人节点
+        function parsePersonDivNode(divNode) {
+            var person = new Object();
+            var childNodes = divNode.childNodes;
+            for (var i = 0 ; i < childNodes.length; i++) {
+                if (childNodes[i].nodeType != 1) continue;
+                var name = childNodes[i].getAttribute("data-type");
+                switch (name) {
+                    case "person_name":
+                        {
+                            //alert("名字:" + childNodes[i].value);
+                            person.name = childNodes[i].value.trim();
+                        }
+                        break;
+
+                    case "person_duty":
+                        {
+                            var index = childNodes[i].selectedIndex;
+                            //alert("责任:" + childNodes[i].options[index].value);
+                            person.duty = childNodes[i].options[index].value;
+                        }
+                        break;
+
+                    case "person_vehicle":
+                        {
+                            var index = childNodes[i].selectedIndex;
+                            //alert("车辆:" + childNodes[i].options[index].value);
+                            person.vehicle = childNodes[i].options[index].value;
+                        }
+                        break;
+
+                    case "person_action":
+                        {
+                            //var tmp = "";
+                            person.action = new Array();
+                            var actionNodes = childNodes[i].childNodes;
+                            for (var j = 0; j < actionNodes.length; j++) {
+                                if (actionNodes[j].type == "checkbox" && actionNodes[j].checked) {
+                                    //if (tmp != "") {
+                                    //    tmp += " ,"
+                                    //}
+                                    //tmp += actionNodes[j].value;
+                                    person.action.push(actionNodes[j].value);
+                                }
+                            }
+                            //alert("违法行为:" + tmp);
+                        }
+                        break;
+                }
+            }
+            return person;
+        }
+
+        //获取输入数据
+        function getPersonInfo() {
+            clearAccident();
+            var personArray = new Array();
+            var personDivGroup = document.getElementsByClassName("personDiv");
+            for (var i = 0; i < personDivGroup.length; i++) {
+                var person = parsePersonDivNode(personDivGroup[i]);
+                if (person.hasOwnProperty("name") && !person.name.isEmpty()) {
+                    var index = personArray.length;
+
+                    switch (person.duty) {
+                        case "全责":
+                            {
+                                if (g_accident.condition != 1) {
+                                    g_accident.condition = 1;
+                                    g_accident.QuanZeIndex = index;
+                                }
+                            }
+                            break;
+
+                        case "主要":
+                            {
+                                if (g_accident.condition == 0) {
+                                    g_accident.condition = 2;
+                                }
+                                g_accident.ZhuYaoIndex = index;
+                            }
+                            break;
+
+                        case "次要":
+                            {
+                                g_accident.CiYaoIndex.push(index);
+                            }
+                            break;
+
+                        case "同等":
+                            {
+                                if (g_accident.condition == 0) {
+                                    g_accident.condition = 3;
+                                }
+                                g_accident.TongDengIndex.push(index);
+                            }
+                            break;
+
+                        case "无责":
+                            {
+                                g_accident.WuZeIndex.push(index);
+                            }
+                            break;
+                    }
+
+                    personArray.push(person);
+                }
+            }
+
+            //for (var i = 0; i < personArray.length; i++) {
+            //    alertPersonInfo(personArray[i]);
+            //}
+
+            var text = makeRenDingShu_Part3(personArray);
+            text += "\r\n";
+            text += makeRenDingShu_Part4(personArray);
+            //alert(text);
+            document.getElementById("RenDingShu").value = text;
+        }
+
+        //打印出单个责任人的信息
+        function alertPersonInfo(person) {
+            var info;
+            var firstFlag = 1;
+            info = "姓名：" + person.name + "\r\n责任：" + person.duty + "\r\n车辆：" + person.vehicle + "\r\n";
+            info += "违法行为：";
+            for (var i = 0; i < person.action.length; i++) {
+                if (1 == firstFlag) {
+                    info += person.action[i];
+                    firstFlag = 0;
+                } else {
+                    info += ("，" + person.action[i]);
+                }
+            }
+            alert(info);
+        }
+
+        //XX驾驶机动车A、B、C的违法行为是事故发生的(全部、主要、同等（不写）、次要)原因
+        function makeText_XX_Actions_Is_XX_Reason(person) {
+            var text = "";
+            text += person.name;
+            switch (person.vehicle) {
+                case "非机动车": text += "驾驶非机动车"; break;
+                case "机动车": text += "驾驶机动车"; break;
+                case "行人": break;
+            }
+            for (var i = 0; i < person.action.length; i++) {
+                text += findActionText(person.action[i]);
+                text += "、";
+            }
+            text = text.substr(0, text.length - 1);
+            text += "的违法行为是事故发生的";
+            switch (person.duty) {
+                case "全责": text += "全部原因"; break;
+                case "主要": text += "主要原因"; break;
+                case "次要": text += "次要原因"; break;
+                case "同等": text += "原因"; break;
+            }
+            return text;
+        }
+
+        //生成认定书第3部分
+        function makeRenDingShu_Part3(personArray) {
+            var text = "（三）交通事故的证据及事故形成原因分析：\r\n";
+            text += "\t上述事实有以下证据予以证实：现场照片、现场图、现场勘查笔录、询问笔录等。\r\n\t";
+
+            ////1 有人负全责的情况
+            //for (var i = 0; i < personArray.length; i++) {
+            //    if (personArray[i].duty == "全责") {
+            //        g_accident.condition = 1;
+            //        text += makeText_XX_Actions_Is_XX_Reason(personArray[i]);
+            //        text += "。";
+            //        return text;
+            //    }
+            //}
+
+            ////2 主要、次要原因的情况
+            //for (var i = 0; i < personArray.length; i++) {
+            //    if (personArray[i].duty == "主要") {
+            //        g_accident.condition = 2;
+            //        text += makeText_XX_Actions_Is_XX_Reason(personArray[i]);
+            //        for (var i = 0; i < personArray.length; i++) {
+            //            if (personArray[i].duty == "次要") {
+            //                text += "，";
+            //                text += makeText_XX_Actions_Is_XX_Reason(personArray[i]);
+            //            }
+            //        }
+            //        text += "。";
+            //        return text;
+            //    }
+            //}
+
+            ////3 同等原因
+            //for (var i = 0; i < personArray.length; i++) {
+            //    if (personArray[i].duty == "同等") {
+            //        g_accident.condition = 3;
+            //        text += makeText_XX_Actions_Is_XX_Reason(personArray[i]);
+            //        text += "，";
+            //    }
+            //}
+            //if (3 == g_accident.condition) {
+            //    text = text.substr(0, text.length - 1);
+            //    text += "。";
+            //    return text;
+            //}
+
+            switch (g_accident.condition) {
+                //1 有人负全责的情况
+                case 1:
+                    {
+                        text += makeText_XX_Actions_Is_XX_Reason(personArray[g_accident.QuanZeIndex]);
+                        text += "。";
+                        return text;
+                    }
+                    break;
+
+                case 2:
+                    {
+                        text += makeText_XX_Actions_Is_XX_Reason(personArray[g_accident.ZhuYaoIndex]);
+                        for (var i = 0; i < g_accident.CiYaoIndex.length; i++) {
+                            text += "，";
+                            text += makeText_XX_Actions_Is_XX_Reason(personArray[g_accident.CiYaoIndex[i]]);
+                        }
+                        text += "。";
+                        return text;
+                    }
+                    break;
+
+                case 3:
+                    {
+                        for (var i = 0; i < g_accident.TongDengIndex.length; i++) {
+                            text += makeText_XX_Actions_Is_XX_Reason(personArray[g_accident.TongDengIndex[i]]);
+                            text += "，";
+                        }
+                        text = text.substr(0, text.length - 1);
+                        text += "。";
+                        return text;
+                    }
+                    break;
+            }
+
+            return "";
+        }
+
+        //找到违法行为文本
+        function findActionText(title) {
+            for (var i = 0; i < motorActionArray.length; i++) {
+                if (motorActionArray[i].title == title) {
+                    return motorActionArray[i].action;
+                }
+            }
+            return "";
+        }
+
+        //找到法律条文
+        function findLawText(title) {
+            for (var i = 0; i < motorActionArray.length; i++) {
+                if (motorActionArray[i].title == title) {
+                    return motorActionArray[i].law;
+                }
+            }
+            return "";
+        }
+
+        //@驾驶机动车A的违法行为违反（A所对应的法律条款）。
+        function makeText_XX_Action_Obey_XX_Law(person) {
+            var text = "";
+            for (var i = 0; i < person.action.length; i++) {
+                text += "\t";
+                text += person.name;
+                switch (person.vehicle) {
+                    case "非机动车": text += "驾驶非机动车"; break;
+                    case "机动车": text += "驾驶机动车"; break;
+                    case "行人": break;
+                }
+                text += findActionText(person.action[i]);
+                text += "的违法行为违反";
+                text += findLawText(person.action[i]);
+                text += "。\r\n";
+            }
+            return text;
+        }
+
+        //生成认定书第4部分
+        function makeRenDingShu_Part4(personArray) {
+            var text = "（四）当事人导致交通事故的过错及责任或者意外原因：\r\n";
+            for (var i = 0; i < personArray.length; i++) {
+                text += makeText_XX_Action_Obey_XX_Law(personArray[i]);
+            }
+
+            text += "\t";
+            text += makeText_Part4_1(personArray);
+            text += "根据《中华人民共和国道路交通安全法实施条例》第九十一条、《道路交通事故处理程序规定》第四十六条第一款第";
+            switch (g_accident.condition) {
+                case 1: text += "一"; break;
+                default: text += "二"; break;
+            }
+            text += "项规定，";
+
+            switch (g_accident.condition) {
+                case 1:
+                    {
+                        text += makeText_Part4_Fragment2(personArray[g_accident.QuanZeIndex]);
+                        text += "，";
+                        for (var j = 0; j < g_accident.WuZeIndex.length; j++) {
+                            text += makeText_Part4_Fragment2(personArray[g_accident.WuZeIndex[j]]);
+                            text += "，";
+                        }
+                        text = text.substr(0, text.length - 1);
+                        text += "。";
+                    }
+                    break;
+
+                case 2:
+                    {
+                        text += makeText_Part4_Fragment2(personArray[g_accident.ZhuYaoIndex]);
+                        text += "，";
+                        for (var j = 0; j < g_accident.CiYaoIndex.length; j++) {
+                            text += makeText_Part4_Fragment2(personArray[g_accident.CiYaoIndex[j]]);
+                            text += "，";
+                        }
+                        for (var j = 0; j < g_accident.WuZeIndex.length; j++) {
+                            text += makeText_Part4_Fragment2(personArray[g_accident.WuZeIndex[j]]);
+                            text += "，";
+                        }
+                        text = text.substr(0, text.length - 1);
+                        text += "。";
+                    }
+                    break;
+
+                case 3:
+                    {
+                        for (var j = 0; j < g_accident.TongDengIndex.length; j++) {
+                            text += makeText_Part4_Fragment2(personArray[g_accident.TongDengIndex[j]]);
+                            text += "，";
+                        }
+                        for (var j = 0; j < g_accident.WuZeIndex.length; j++) {
+                            text += makeText_Part4_Fragment2(personArray[g_accident.WuZeIndex[j]]);
+                            text += "，";
+                        }
+                        text = text.substr(0, text.length - 1);
+                        text += "。";
+                    }
+                    break;
+            }
+            text += "\r\n\t特此认定。";
+
+            return text;
+        }
+
+
+        //XX驾驶机动车A、B的违法行为
+        function makeText_Part4_Fragment1(person) {
+            var text = "";
+            text += person.name;
+            switch (person.vehicle) {
+                case "非机动车": text += "驾驶非机动车"; break;
+                case "机动车": text += "驾驶机动车"; break;
+                case "行人": break;
+            }
+            for (var i = 0; i < person.action.length; i++) {
+                text += findActionText(person.action[i]);
+                text += "、";
+            }
+            text = text.substr(0, text.length - 1);
+            text += "的违法行为";
+            return text;
+        }
+
+        //XX驾驶机动车A、B的违法行为对事故发生起到全部过错作用。
+        function makeText_Part4_1_Case1(personArray) {
+            var text = "";
+            text += makeText_Part4_Fragment1(personArray[g_accident.QuanZeIndex])
+            text += "对事故发生起到全部过错作用。";
+            return text;
+        }
+
+        //XX驾驶机动车A、B的违法行为相比YY驾驶机动车C、D的违法行为及ZZ驾驶机动车E、F的违法行为对事故发生所起作用大，过错严重。
+        function makeText_Part4_1_Case2(personArray) {
+            var text = "";
+            text += makeText_Part4_Fragment1(personArray[g_accident.ZhuYaoIndex]);
+            text += "相比";
+            for (i = 0; i < g_accident.CiYaoIndex.length; i++) {
+                text += makeText_Part4_Fragment1(personArray[g_accident.CiYaoIndex[i]]);
+                text += "及";
+            }
+            text = text.substr(0, text.length - 1);
+            text += "对事故发生所起作用大，过错严重。";
+            return text;
+        }
+
+        //XX驾驶机动车A、B的违法行为相比YY驾驶机动车C、D的违法行为及ZZ驾驶机动车E、F的违法行为对事故发生所起作用同等，过错相当。
+        function makeText_Part4_1_Case3(personArray) {
+            var text = "";
+            text += makeText_Part4_Fragment1(personArray[g_accident.TongDengIndex[0]]);
+            text += "相比";
+            for (i = 1; i < g_accident.TongDengIndex.length; i++) {
+                text += makeText_Part4_Fragment1(personArray[g_accident.TongDengIndex[i]]);
+                text += "及";
+            }
+            text = text.substr(0, text.length - 1);
+            text += "对事故发生所起作用同等，过错相当。";
+            return text;
+        }
+
+        function makeText_Part4_1(personArray) {
+            switch (g_accident.condition) {
+                case 1: return makeText_Part4_1_Case1(personArray);
+                case 2: return makeText_Part4_1_Case2(personArray);
+                case 3: return makeText_Part4_1_Case3(personArray);
+            }
+            return "";
+        }
+
+        //XXX承担此事故的XX责任
+        function makeText_Part4_Fragment2(person) {
+            switch (person.duty) {
+                case "全责": text = person.name + "承担此事故的全部责任"; break;
+                case "主要": text = person.name + "承担此事故的主要责任"; break;
+                case "次要": text = person.name + "承担此事故的次要责任"; break;
+                case "同等": text = person.name + "承担此事故的同等责任"; break;
+                case "无责": text = person.name + "无责任"; break;
+            }
+            return text;
+        }
+
+        function onClickSubmitButton() {
+            //检查是否勾选
+            alert(document.getElementById("illegal1").checked)
+            //document.getElementById("illegal1").checked = !document.getElementById("illegal1").checked
+            //alert("onClickSubmitButton")
+        }
+
+        //去掉字符串头尾的空白字符
+        String.prototype.trim = function () {
+            return this.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+        }
+
+        //判断字符串是否为空
+        String.prototype.isEmpty = function () {
+            if (typeof this == "undefined" || this == null || this == "") {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        //删除所有子节点
+        function removeAllChild(p) {
+            while (p.hasChildNodes()) //当elem下还存在子节点时 循环继续
+            {
+                p.removeChild(p.firstChild);
+            }
+        }
+
+    </script>
+
+    <h1>
+        认定书生成
+    </h1>
+
+    <div id="personList">
+
+    </div>
+
+    <div class="resultDiv">
+        <br />
+        <input type="submit" onclick="addPerson()" value="+ 添加事故责任人" />
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="submit" onclick="getPersonInfo()" value="生成认定书" />
+        <br />
+        <br />
+        <textarea id="RenDingShu" rows="16" cols="40">认定书</textarea>
+    </div>
+
+</body>
+</html>
